@@ -376,8 +376,10 @@ final class SimpleKafkaConsumer implements KafkaConsumer {
           // Call the callback
           invokeCallback(messages, offset);
         } catch (Throwable t) {
-          if (running || !(t instanceof ClosedByInterruptException)) {
-            // Only log if it is still running, otherwise, it just the interrupt caused by the stop.
+          if (!running) {
+            LOG.debug("Unable to fetch messages on {}.Service shutdown is in progress.", topicPart);
+          } else if (running && !(t instanceof ClosedByInterruptException)) {
+          // Only log if it is still running, otherwise, it just the interrupt caused by the stop.
             LOG.info("Exception when fetching message on {}.", topicPart, t);
           }
           consumers.refresh(consumerEntry.getKey());
